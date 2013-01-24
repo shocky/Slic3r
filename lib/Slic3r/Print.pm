@@ -128,6 +128,9 @@ sub add_model {
             @{$print_object->copies} = map [ scale $_->offset->[X], scale $_->offset->[Y] ], @{$object->instances};
         }
     }
+    
+    die "The model is shorter than the layer height.\n"
+        if ! grep $_->size->[Z] / 2 > $_->layers->[0]->slice_z, @{$self->objects};
 }
 
 sub validate {

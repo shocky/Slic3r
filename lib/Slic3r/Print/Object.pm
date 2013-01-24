@@ -86,11 +86,17 @@ sub slice {
             },
         );
     }
-    die "Invalid input file\n" if !@{$self->layers};
     
     # free memory
     $self->meshes(undef) unless $params{keep_meshes};
     
+    # skip if model is too short
+    if ($self->layers->[0]->slice_z >= $self->size->[Z] / 2) {
+        warn sprintf("%s was skipped because it is shorter than the layer height.\n", File::Basename::basename($self->input_file));
+        pop @{$self->layers};
+        return;
+    }
+
     # remove last layer if empty
     # (we might have created it because of the $max_layer = ... + 1 code in TriangleMesh)
     pop @{$self->layers} if !map @{$_->lines}, @{$self->layers->[-1]->regions};
@@ -180,7 +186,8 @@ sub slice {
         }
     }
     
-    warn "No layers were detected. You might want to repair your STL file and retry.\n"
+    warn sprintf("No layers were detected for %s. You might want to repair your STL file and retry.\n", 
+        File::Basename::basename($self->input_file))
         if !@{$self->layers};
 }
 
