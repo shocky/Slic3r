@@ -590,24 +590,20 @@ sub generate_support_material {
     my %layers_interfaces = (); # this represents the areas of each layer having an overhang in the immediately upper layer
     {
         my @current_support_regions = ();   # expolygons we've started to support (i.e. below the empty interface layers)
-        my @queue = ();                     # the number of items of this array determines the number of empty interface layers
+        my @upper_layer_overhangs = ();
         for my $i (reverse 0 .. $#{$self->layers}) {
-            next unless $Slic3r::Config->support_material || ($i <= $Slic3r::Config->raft_layers);  # <= because we need to start from the first non-raft layer
-            
             my $layer = $self->layers->[$i];
             my $lower_layer = $i > 0 ? $self->layers->[$i-1] : undef;
             
             my @current_layer_offsetted_slices = map $_->offset_ex($distance_from_object), @{$layer->slices};
             
-            # $queue[-1] contains the overhangs of the upper layer, regardless of any empty interface layers
-            # $queue[0] contains the overhangs of the first upper layer above the empty interface layers
             $layers_interfaces{$i} = diff_ex(
-                [ map @$_, @{ $queue[-1] || [] } ],
+                [ map @$_, @upper_layer_overhangs ],
                 [ map @$_, @current_layer_offsetted_slices ],
             );
             
             # step 1: generate support material in current layer (for upper layers)
-            push @current_support_regions, @{ shift @queue } if @queue && $i < $#{$self->layers};
+            push @current_support_regions, @upper_layer_overhangs;
             
             @current_support_regions = @{diff_ex(
                 [ map @$_, @current_support_regions ],
@@ -623,17 +619,16 @@ sub generate_support_material {
             );
             $_->simplify($flow->scaled_spacing) for @{$layers{$i}};
             
-            # step 2: get layer overhangs and put them into queue for adding support inside lower layers
+            # step 2: get layer overhangs and save them for adding support inside lower layers
             # we need an angle threshold for this
-            my @overhangs = ();
+            @upper_layer_overhangs = ();
             if ($lower_layer) {
-                @overhangs = map $_->offset_ex(2 * $overhang_width), @{diff_ex(
+                @upper_layer_overhangs = map $_->offset_ex(2 * $overhang_width), @{diff_ex(
                     [ map @$_, map $_->offset_ex(-$overhang_width), @{$layer->slices} ],
                     [ map @$_, @{$lower_layer->slices} ],
                     1,
                 )};
             }
-            push @queue, [@overhangs];
         }
     }
     return if !map @$_, values %layers;
