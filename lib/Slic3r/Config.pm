@@ -521,8 +521,8 @@ our $Options = {
         tooltip => 'Fill pattern for general low-density infill.',
         cli     => 'fill-pattern=s',
         type    => 'select',
-        values  => [qw(rectilinear line concentric honeycomb hilbertcurve archimedeanchords octagramspiral)],
-        labels  => [qw(rectilinear line concentric honeycomb), 'hilbertcurve (slow)', 'archimedeanchords (slow)', 'octagramspiral (slow)'],
+        values  => [qw(rectilinear line concentric honeycomb hilbertcurve archimedeanchords octagramspiral partition)],
+        labels  => [qw(rectilinear line concentric honeycomb), 'hilbertcurve (slow)', 'archimedeanchords (slow)', 'octagramspiral (slow)', 'partition'],
         default => 'honeycomb',
     },
     'solid_fill_pattern' => {
