@@ -11,6 +11,7 @@ use Slic3r::Fill::Line;
 use Slic3r::Fill::OctagramSpiral;
 use Slic3r::Fill::PlanePath;
 use Slic3r::Fill::Rectilinear;
+use Slic3r::Fill::Partition;
 use Slic3r::ExtrusionPath ':roles';
 use Slic3r::Geometry qw(X Y PI scale chained_path);
 use Slic3r::Geometry::Clipper qw(union_ex diff diff_ex intersection_ex offset);
@@ -29,6 +30,7 @@ our %FillTypes = (
     line                => 'Slic3r::Fill::Line',
     concentric          => 'Slic3r::Fill::Concentric',
     honeycomb           => 'Slic3r::Fill::Honeycomb',
+    partition           => 'Slic3r::Fill::Partition',
 );
 
 sub filler {
